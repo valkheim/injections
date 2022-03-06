@@ -2,13 +2,15 @@
 
 #include "ulib.h"
 
-void pop_calc()
+int main()
 {
-  void *exec = VirtualAlloc(0, sizeof(ul::shellcodes::x86::pop_calc),
-                            MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-  memcpy(exec, ul::shellcodes::x86::pop_calc,
-         sizeof(ul::shellcodes::x86::pop_calc));
+#if _WIN64
+  constexpr uint8_t shellcode[206] = ul::shellcodes::x64::pop_calc;
+#else
+  constexpr uint8_t shellcode[201] = ul::shellcodes::x86::pop_calc;
+#endif
+
+  void *exec = VirtualAlloc(0, sizeof(shellcode), MEM_COMMIT, PAGE_EXECUTE_READWRITE);
+  memcpy(exec, shellcode, sizeof(shellcode));
   ((void (*)())exec)();
 }
-
-int main() { pop_calc(); }
