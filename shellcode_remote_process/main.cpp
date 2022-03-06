@@ -4,7 +4,7 @@
 
 int main(int argc, char** argv)
 {
-#if _WIN64 
+#if _WIN64
   constexpr uint8_t shellcode[206] = ul::shellcodes::x64::pop_calc;
 #else
   constexpr uint8_t shellcode[201] = ul::shellcodes::x86::pop_calc;

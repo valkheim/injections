@@ -16,5 +16,5 @@ cmake --build build/x64 --config Debug
 cmake --build build/x64 --target clangformat
 
 # Test
-# .\build\x86\ulib\test\Debug\ulib_test.exe
+.\build\x86\ulib\test\Debug\ulib_test.exe
 .\build\x64\ulib\test\Debug\ulib_test.exe
