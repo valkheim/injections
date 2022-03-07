@@ -1,3 +1,5 @@
+#include <stdio.h>
+#include <tchar.h>
 #include <windows.h>
 
 extern "C" __declspec(dllexport) bool example()
@@ -6,9 +8,14 @@ extern "C" __declspec(dllexport) bool example()
   return true;
 }
 
-BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserved)
+BOOL APIENTRY DllMain(HMODULE hModule, DWORD nReason, LPVOID lpReserved)
 {
-  switch (ul_reason_for_call) {
+  TCHAR pszMessage[1024] = {0};
+  _stprintf_s(pszMessage, _T("GetCurrentProcessId() %d, hModule 0x%p, nReason %d\r\n"), GetCurrentProcessId(), hModule,
+              nReason);
+  OutputDebugString(pszMessage);
+
+  switch (nReason) {
     case DLL_PROCESS_ATTACH:
       MessageBoxA(NULL, "DLL_PROCESS_ATTACH", "DLL_PROCESS_ATTACH", NULL);
       break;
@@ -25,6 +32,5 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
       MessageBoxA(NULL, "DLL_PROCESS_DETACH", "DLL_PROCESS_DETACH", NULL);
       break;
   }
-
   return TRUE;
 }

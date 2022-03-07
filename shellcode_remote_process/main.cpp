@@ -10,7 +10,7 @@ int main(int argc, char** argv)
   constexpr uint8_t shellcode[201] = ul::shellcodes::x86::pop_calc;
 #endif
 
-  // Try with C:\Windows\system32\notepad.exe or C:\Windows\SysWOW32\notepad.exe
+  // Try with C:\Windows\system32\notepad.exe or C:\Windows\SysWOW64\notepad.exe
   printf("Injecting to PID: %i", atoi(argv[1]));
   auto hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, DWORD(atoi(argv[1])));
   auto remoteBuffer =
