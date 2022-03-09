@@ -43,8 +43,7 @@ namespace ul
     }
 
     std::vector<char> buffer(cbInfo);
-    if (::GetFileVersionInfoExW(FILE_VER_GET_NEUTRAL, system, dummy, static_cast<DWORD>(buffer.size()), &buffer[0]) ==
-        0) {
+    if (::GetFileVersionInfoExW(FILE_VER_GET_NEUTRAL, system, dummy, static_cast<DWORD>(buffer.size()), &buffer[0]) == 0) {
       ::ul::error("Cannot GetFileVersionInfoExW");
       return {};
     }
@@ -62,7 +61,7 @@ namespace ul
     }
 
     auto pFixed = static_cast<const VS_FIXEDFILEINFO *>(p);
-    return WindowsBuildVersion{HIWORD(pFixed->dwFileVersionMS), LOWORD(pFixed->dwFileVersionMS),
-                               HIWORD(pFixed->dwFileVersionLS), LOWORD(pFixed->dwFileVersionLS)};
+    return WindowsBuildVersion{HIWORD(pFixed->dwFileVersionMS), LOWORD(pFixed->dwFileVersionMS), HIWORD(pFixed->dwFileVersionLS),
+                               LOWORD(pFixed->dwFileVersionLS)};
   }
 };  // namespace ul

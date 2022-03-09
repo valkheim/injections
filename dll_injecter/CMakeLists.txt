@@ -1,4 +1,4 @@
-set(target shellcode_remote_process)
+set(target dll_injecter)
 file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
 add_executable(${target} ${sources})
 target_include_directories(${target} PUBLIC "../ulib/include/public")

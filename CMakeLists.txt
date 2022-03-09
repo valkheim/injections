@@ -12,7 +12,16 @@ set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
 set(GOOGLETEST_VERSION 1.11.0)
 add_subdirectory(third_party/googletest)
 
-list(APPEND targets ulib shellcode_local_process shellcode_remote_process dll_sample dll_inject)
+list(APPEND targets
+    ulib
+    #shellcode_local_process
+    #shellcode_remote_process
+    #pe_sample
+    #dll_sample_injectee
+    dll_reflective_injectee
+    dll_injecter
+)
+
 foreach(target IN ITEMS ${targets})
     message(STATUS "Handle ${target}")
     add_subdirectory(${target})

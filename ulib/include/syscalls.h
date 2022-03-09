@@ -29,10 +29,10 @@ namespace ul
   using Syscalls = std::vector<::ul::Syscall>;
   using on_syscall = std::function<::ul::walk_t(::ul::Syscall const& syscall)>;
 
-  void walk_syscalls(on_syscall callback);
-  void walk_syscalls_x64(on_syscall&& callback);
+  auto walk_syscalls(on_syscall callback) -> bool;
+  auto walk_syscalls_x86(on_syscall&& callback) -> bool;
+  auto walk_syscalls_x64(on_syscall&& callback) -> bool;
   void show_syscalls();
-  [[nodiscard]] auto with_syscall(std::string_view&& requested_name,
-                                  std::function<void(::ul::Syscall const& syscall)> callback) -> bool;
+  [[nodiscard]] auto with_syscall(std::string_view&& requested_name, std::function<void(::ul::Syscall const& syscall)> callback) -> bool;
   auto get_syscalls() -> Syscalls;
 }  // namespace ul

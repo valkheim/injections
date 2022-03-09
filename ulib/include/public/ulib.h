@@ -1,5 +1,6 @@
 #pragma once
 
+#include "../addresses.h"
 #include "../log.h"
 #include "../modules.h"
 #include "../nt.h"

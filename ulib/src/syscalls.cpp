@@ -24,7 +24,7 @@ namespace ul
     return ss.str();
   }
 
-  void walk_syscalls_x64(on_syscall &&callback)
+  auto walk_syscalls_x64(on_syscall &&callback) -> bool
   {
     /*
     clang-format off
@@ -56,21 +56,21 @@ namespace ul
     */
     constexpr auto module_name = R"(C:\windows\system32\ntdll.dll)";
     auto function_code = std::array<std::uint8_t, g_regular_syscall_function_size_x64>{0};
-    ::ul::walk_exports(module_name, [&](PVOID const address, std::string const &name) -> ::ul::walk_t {
-      if (!name.starts_with("Nt")) {
+    return ::ul::walk_exports(module_name, [&](::ul::Export const &xport) -> ::ul::walk_t {
+      if (!xport.name.starts_with("Nt")) {
         return ::ul::walk_t::WALK_CONTINUE;
       }
 
-      std::memcpy(function_code.data(), address, g_regular_syscall_function_size_x64);
+      std::memcpy(function_code.data(), xport.address, g_regular_syscall_function_size_x64);
       if (function_code[3] != 0xB8) {
         return ::ul::walk_t::WALK_CONTINUE;
       }
 
-      return callback(Syscall{false, function_code[4], address, name});
+      return callback(Syscall{false, function_code[4], xport.address, xport.name});
     });
   }
 
-  void walk_syscalls_x86(on_syscall &&callback)
+  auto walk_syscalls_x86(on_syscall &&callback) -> bool
   {
     /*
     clang-format off
@@ -98,26 +98,26 @@ namespace ul
     */
     constexpr auto module_name = R"(C:\Windows\SysWOW64\ntdll.dll)";
     auto function_code = std::array<std::uint8_t, g_regular_syscall_function_size_x86>{0};
-    ::ul::walk_exports(module_name, [&](PVOID const address, std::string const &name) -> ::ul::walk_t {
-      if (!name.starts_with("Nt")) {
+    return ::ul::walk_exports(module_name, [&](::ul::Export const &xport) -> ::ul::walk_t {
+      if (!xport.name.starts_with("Nt")) {
         return ::ul::walk_t::WALK_CONTINUE;
       }
 
-      std::memcpy(function_code.data(), address, g_regular_syscall_function_size_x86);
+      std::memcpy(function_code.data(), xport.address, g_regular_syscall_function_size_x86);
       if (function_code[0] != 0xB8) {
         return ::ul::walk_t::WALK_CONTINUE;
       }
 
-      return callback(Syscall{false, function_code[1], address, name});
+      return callback(Syscall{false, function_code[1], xport.address, xport.name});
     });
   }
 
-  void walk_syscalls(on_syscall callback)
+  auto walk_syscalls(on_syscall callback) -> bool
   {
 #if _WIN64
-    walk_syscalls_x64(std::move(callback));
+    return walk_syscalls_x64(std::move(callback));
 #else
-    walk_syscalls_x86(std::move(callback));
+    return walk_syscalls_x86(std::move(callback));
 #endif
   }
 

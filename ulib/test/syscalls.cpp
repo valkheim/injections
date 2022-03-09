@@ -20,7 +20,7 @@ TEST(syscalls, test_list)
         return lhs.name < rhs.name;
     });
 
-    for(auto&s:syscalls) printf("%s %d\n",s.name.c_str(),s.number);
+    // for(auto&s:syscalls) printf("%s %d\n",s.name.c_str(),s.number);
 
     auto build_number = ::ul::get_windows_build_version()->c;
 #ifdef _WIN64

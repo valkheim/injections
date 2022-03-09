@@ -11,8 +11,7 @@ extern "C" __declspec(dllexport) bool example()
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD nReason, LPVOID lpReserved)
 {
   TCHAR pszMessage[1024] = {0};
-  _stprintf_s(pszMessage, _T("GetCurrentProcessId() %d, hModule 0x%p, nReason %d\r\n"), GetCurrentProcessId(), hModule,
-              nReason);
+  _stprintf_s(pszMessage, _T("GetCurrentProcessId() %d, hModule 0x%p, nReason %d\r\n"), GetCurrentProcessId(), hModule, nReason);
   OutputDebugString(pszMessage);
 
   switch (nReason) {

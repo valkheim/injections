@@ -2,8 +2,6 @@
 
 #include <Windows.h>
 
-#include "addresses.h"
-
 #define STATUS_INFO_LENGTH_MISMATCH 0xc0000004
 
 typedef LONG KPRIORITY;
@@ -111,52 +109,123 @@ typedef struct _SYSTEM_MODULE_INFORMATION {
   SYSTEM_MODULE Modules[ANYSIZE_ARRAY];
 } SYSTEM_MODULE_INFORMATION, *PSYSTEM_MODULE_INFORMATION;
 
-typedef enum _SYSTEM_INFORMATION_CLASS {
-  SystemProcessAndThreadInformation = 0x05,
-  SystemModuleInformation = 0x0b
-} SYSTEM_INFORMATION_CLASS;
+typedef enum _SYSTEM_INFORMATION_CLASS { SystemProcessAndThreadInformation = 0x05, SystemModuleInformation = 0x0b } SYSTEM_INFORMATION_CLASS;
 
-typedef NTSTATUS(WINAPI* _NtQuerySystemInformation)(__in SYSTEM_INFORMATION_CLASS SystemInformationClass,
-                                                    __inout PVOID SystemInformation, __in ULONG SystemInformationLength,
-                                                    __out_opt PULONG ReturnLength);
+typedef struct _UNICODE_STR {
+  USHORT Length;
+  USHORT MaximumLength;
+  PWSTR pBuffer;
+} UNICODE_STR, *PUNICODE_STR;
 
-namespace ul
+// WinDbg> dt -v ntdll!_LDR_DATA_TABLE_ENTRY
+//__declspec( align(8) )
+typedef struct _LDR_DATA_TABLE_ENTRY {
+  // LIST_ENTRY InLoadOrderLinks; // As we search from PPEB_LDR_DATA->InMemoryOrderModuleList we dont use the first entry.
+  LIST_ENTRY InMemoryOrderModuleList;
+  LIST_ENTRY InInitializationOrderModuleList;
+  PVOID DllBase;
+  PVOID EntryPoint;
+  ULONG SizeOfImage;
+  UNICODE_STR FullDllName;
+  UNICODE_STR BaseDllName;
+  ULONG Flags;
+  SHORT LoadCount;
+  SHORT TlsIndex;
+  LIST_ENTRY HashTableEntry;
+  ULONG TimeDateStamp;
+} LDR_DATA_TABLE_ENTRY, *PLDR_DATA_TABLE_ENTRY;
+
+// WinDbg> dt -v ntdll!_PEB_LDR_DATA
+typedef struct _PEB_LDR_DATA  //, 7 elements, 0x28 bytes
 {
+  DWORD dwLength;
+  DWORD dwInitialized;
+  LPVOID lpSsHandle;
+  LIST_ENTRY InLoadOrderModuleList;
+  LIST_ENTRY InMemoryOrderModuleList;
+  LIST_ENTRY InInitializationOrderModuleList;
+  LPVOID lpEntryInProgress;
+} PEB_LDR_DATA, *PPEB_LDR_DATA;
 
-  template <typename T>
-  struct SystemInformationClass : std::false_type {
-  };
-  template <>
-  struct SystemInformationClass<SYSTEM_PROCESS_INFORMATION> {
-    static constexpr auto value = SystemModuleInformation;
-  };
-  template <>
-  struct SystemInformationClass<PSYSTEM_MODULE_INFORMATION> {
-    static constexpr auto value = SystemModuleInformation;
-  };
+// WinDbg> dt -v ntdll!_PEB_FREE_BLOCK
+typedef struct _PEB_FREE_BLOCK  // 2 elements, 0x8 bytes
+{
+  struct _PEB_FREE_BLOCK* pNext;
+  DWORD dwSize;
+} PEB_FREE_BLOCK, *PPEB_FREE_BLOCK;
 
-  template <typename SystemInformation>
-  SystemInformation get_system_informations()
-  {
-    auto NtQuerySystemInformation =
-        (_NtQuerySystemInformation)::ul::get_module_export("ntdll.dll", "NtQuerySystemInformation");
-    static_assert(SystemInformationClass<SystemInformation>::value, "Missing SystemInformationClass specialization");
-    auto system_information_class = SystemInformationClass<SystemInformation>::value;
-    SystemInformation system_informations = NULL;
-    ULONG length = 0x1000;
-    for (;;) {
-      system_informations =
-          (SystemInformation)VirtualAlloc(NULL, length, MEM_RESERVE | MEM_COMMIT, PAGE_EXECUTE_READWRITE);
-      if (system_informations == NULL) break;
+// struct _PEB is defined in Winternl.h but it is incomplete
+// WinDbg> dt -v ntdll!_PEB
+typedef struct __PEB  // 65 elements, 0x210 bytes
+{
+  BYTE bInheritedAddressSpace;
+  BYTE bReadImageFileExecOptions;
+  BYTE bBeingDebugged;
+  BYTE bSpareBool;
+  LPVOID lpMutant;
+  LPVOID lpImageBaseAddress;
+  PPEB_LDR_DATA pLdr;
+  LPVOID lpProcessParameters;
+  LPVOID lpSubSystemData;
+  LPVOID lpProcessHeap;
+  PRTL_CRITICAL_SECTION pFastPebLock;
+  LPVOID lpFastPebLockRoutine;
+  LPVOID lpFastPebUnlockRoutine;
+  DWORD dwEnvironmentUpdateCount;
+  LPVOID lpKernelCallbackTable;
+  DWORD dwSystemReserved;
+  DWORD dwAtlThunkSListPtr32;
+  PPEB_FREE_BLOCK pFreeList;
+  DWORD dwTlsExpansionCounter;
+  LPVOID lpTlsBitmap;
+  DWORD dwTlsBitmapBits[2];
+  LPVOID lpReadOnlySharedMemoryBase;
+  LPVOID lpReadOnlySharedMemoryHeap;
+  LPVOID lpReadOnlyStaticServerData;
+  LPVOID lpAnsiCodePageData;
+  LPVOID lpOemCodePageData;
+  LPVOID lpUnicodeCaseTableData;
+  DWORD dwNumberOfProcessors;
+  DWORD dwNtGlobalFlag;
+  LARGE_INTEGER liCriticalSectionTimeout;
+  DWORD dwHeapSegmentReserve;
+  DWORD dwHeapSegmentCommit;
+  DWORD dwHeapDeCommitTotalFreeThreshold;
+  DWORD dwHeapDeCommitFreeBlockThreshold;
+  DWORD dwNumberOfHeaps;
+  DWORD dwMaximumNumberOfHeaps;
+  LPVOID lpProcessHeaps;
+  LPVOID lpGdiSharedHandleTable;
+  LPVOID lpProcessStarterHelper;
+  DWORD dwGdiDCAttributeList;
+  LPVOID lpLoaderLock;
+  DWORD dwOSMajorVersion;
+  DWORD dwOSMinorVersion;
+  WORD wOSBuildNumber;
+  WORD wOSCSDVersion;
+  DWORD dwOSPlatformId;
+  DWORD dwImageSubsystem;
+  DWORD dwImageSubsystemMajorVersion;
+  DWORD dwImageSubsystemMinorVersion;
+  DWORD dwImageProcessAffinityMask;
+  DWORD dwGdiHandleBuffer[34];
+  LPVOID lpPostProcessInitRoutine;
+  LPVOID lpTlsExpansionBitmap;
+  DWORD dwTlsExpansionBitmapBits[32];
+  DWORD dwSessionId;
+  ULARGE_INTEGER liAppCompatFlags;
+  ULARGE_INTEGER liAppCompatFlagsUser;
+  LPVOID lppShimData;
+  LPVOID lpAppCompatInfo;
+  UNICODE_STR usCSDVersion;
+  LPVOID lpActivationContextData;
+  LPVOID lpProcessAssemblyStorageMap;
+  LPVOID lpSystemDefaultActivationContextData;
+  LPVOID lpSystemAssemblyStorageMap;
+  DWORD dwMinimumStackCommit;
+} _PEB, *_PPEB;
 
-      auto status = NtQuerySystemInformation(system_information_class, system_informations, length, &length);
-      if (status != STATUS_INFO_LENGTH_MISMATCH) break;
-
-      if (system_informations != NULL) VirtualFree(system_informations, 0, MEM_RELEASE);
-
-      length <<= 2;
-    }
-
-    return system_informations;
-  }
-}  // namespace ul
+typedef struct {
+  WORD offset : 12;
+  WORD type : 4;
+} IMAGE_RELOC, *PIMAGE_RELOC;

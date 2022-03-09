@@ -1,15 +1,13 @@
 #include "modules.h"
 
+#include "ntquerysysteminformation.hpp"
 #include "utils.h"
 
 namespace ul
 {
   namespace
   {
-    auto get_modules_infos() -> PSYSTEM_MODULE_INFORMATION
-    {
-      return ::ul::get_system_informations<PSYSTEM_MODULE_INFORMATION>();
-    }
+    auto get_modules_infos() -> PSYSTEM_MODULE_INFORMATION { return ::ul::get_system_informations<PSYSTEM_MODULE_INFORMATION>(); }
   }  // namespace
 
   VOID walk_modules(std::function<::ul::walk_t(SYSTEM_MODULE *)> callback)

@@ -141,8 +141,7 @@ namespace ul
     return processes;
   }
 
-  auto with_process_using_enumprocess(std::string_view&& requested_name,
-                                      std::function<::ul::walk_t(::ul::Process)> callback) -> bool
+  auto with_process_using_enumprocess(std::string_view&& requested_name, std::function<::ul::walk_t(::ul::Process)> callback) -> bool
   {
     auto found = false;
     ::ul::walk_processes_ids_using_enumprocess([&](::ul::Process process) -> ::ul::walk_t {
@@ -161,8 +160,7 @@ namespace ul
     return found;
   }
 
-  auto with_process_using_toolhelp(std::string_view&& requested_name,
-                                   std::function<::ul::walk_t(::ul::Process)> callback) -> bool
+  auto with_process_using_toolhelp(std::string_view&& requested_name, std::function<::ul::walk_t(::ul::Process)> callback) -> bool
   {
     auto found = false;
     ::ul::walk_processes_ids_using_toolhelp([&](::ul::Process process) -> ::ul::walk_t {
@@ -181,8 +179,7 @@ namespace ul
     return found;
   }
 
-  auto with_process_using_wts(std::string_view&& requested_name, std::function<::ul::walk_t(::ul::Process)> callback)
-      -> bool
+  auto with_process_using_wts(std::string_view&& requested_name, std::function<::ul::walk_t(::ul::Process)> callback) -> bool
   {
     auto found = false;
     ::ul::walk_processes_ids_using_wts([&](::ul::Process process) -> ::ul::walk_t {
