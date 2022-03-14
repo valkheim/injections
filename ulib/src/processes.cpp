@@ -31,16 +31,16 @@ namespace ul
       return std::string{name};
     }
 
-    auto get_process_from_pid(::ul::Pid const pid) -> ::ul::Process
+    auto get_process_from_pid(::ul::Pid const pid, void* custom) -> ::ul::Process
     {
       auto path = ::ul::get_process_image_path(pid);
       std::optional<std::string> name = std::nullopt;
       if (path) name = ::ul::base_name(*path);
-      return ::ul::Process{pid, path, name};
+      return ::ul::Process{pid, path, name, custom};
     }
   }  // namespace
 
-  void walk_processes_ids_using_enumprocess(std::function<ul::walk_t(::ul::Process)> callback)
+  void walk_processes_ids_using_enumprocess(on_process callback)
   {
     auto count = std::size_t{0};
     auto maxCount = std::size_t{256};
@@ -62,20 +62,19 @@ namespace ul
     }
 
     for (unsigned i = 0; i < count; ++i) {
-      if (callback(::ul::get_process_from_pid((pids[i]))) == ::ul::walk_t::WALK_STOP) break;
+      if (callback(::ul::get_process_from_pid(pids[i], nullptr)) == ::ul::walk_t::WALK_STOP) break;
     }
   }
 
-  void walk_processes_ids_using_toolhelp(std::function<ul::walk_t(::ul::Process)> callback)
+  void walk_processes_ids_using_toolhelp(on_process callback)
   {
-    auto snapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS, 0);
+    auto snapshot = ::CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS | TH32CS_SNAPTHREAD, 0);
     if (snapshot == INVALID_HANDLE_VALUE) {
       ::ul::error("Cannot CreateToolhelp32Snapshot");
       return;
     }
 
-    PROCESSENTRY32 pe;
-    pe.dwSize = sizeof(pe);
+    PROCESSENTRY32 pe{sizeof(PROCESSENTRY32)};
     if (::Process32First(snapshot, &pe) == FALSE) {
       ::ul::error("Cannot Process32First");
       ::CloseHandle(snapshot);
@@ -83,14 +82,12 @@ namespace ul
     }
 
     do {
-      // name from pe.szExeFile
-      // path from Module32First() -> szExePath or QueyFullProcessingImageName
-      if (callback(::ul::get_process_from_pid(pe.th32ProcessID)) == ::ul::walk_t::WALK_STOP) break;
+      if (callback(::ul::get_process_from_pid(pe.th32ProcessID, snapshot)) == ::ul::walk_t::WALK_STOP) break;
     } while (::Process32Next(snapshot, &pe));
     ::CloseHandle(snapshot);
   }
 
-  void walk_processes_ids_using_wts(std::function<ul::walk_t(::ul::Process)> callback)
+  void walk_processes_ids_using_wts(on_process callback)
   {
     PWTS_PROCESS_INFO info;
     DWORD count;
@@ -102,7 +99,7 @@ namespace ul
     for (DWORD i = 0; i < count; ++i) {
       auto process = info + i;
       // name from process->pProcessName
-      if (callback(::ul::get_process_from_pid(process->ProcessId)) == ::ul::walk_t::WALK_STOP) break;
+      if (callback(::ul::get_process_from_pid(process->ProcessId, &process)) == ::ul::walk_t::WALK_STOP) break;
     }
 
     ::WTSFreeMemory(info);
@@ -141,7 +138,7 @@ namespace ul
     return processes;
   }
 
-  auto with_process_using_enumprocess(std::string_view&& requested_name, std::function<::ul::walk_t(::ul::Process)> callback) -> bool
+  auto with_process_using_enumprocess(std::string_view&& requested_name, on_process callback) -> bool
   {
     auto found = false;
     ::ul::walk_processes_ids_using_enumprocess([&](::ul::Process process) -> ::ul::walk_t {
@@ -160,7 +157,22 @@ namespace ul
     return found;
   }
 
-  auto with_process_using_toolhelp(std::string_view&& requested_name, std::function<::ul::walk_t(::ul::Process)> callback) -> bool
+  auto with_process_using_toolhelp(::ul::Pid const requested_pid, on_process callback) -> bool
+  {
+    auto found = false;
+    ::ul::walk_processes_ids_using_toolhelp([&](::ul::Process process) -> ::ul::walk_t {
+      if (process.pid != requested_pid) {
+        return ::ul::walk_t::WALK_CONTINUE;
+      }
+
+      found = true;
+      return callback(process);
+    });
+
+    return found;
+  }
+
+  auto with_process_using_toolhelp(std::string_view&& requested_name, on_process callback) -> bool
   {
     auto found = false;
     ::ul::walk_processes_ids_using_toolhelp([&](::ul::Process process) -> ::ul::walk_t {
@@ -179,7 +191,7 @@ namespace ul
     return found;
   }
 
-  auto with_process_using_wts(std::string_view&& requested_name, std::function<::ul::walk_t(::ul::Process)> callback) -> bool
+  auto with_process_using_wts(std::string_view&& requested_name, on_process callback) -> bool
   {
     auto found = false;
     ::ul::walk_processes_ids_using_wts([&](::ul::Process process) -> ::ul::walk_t {

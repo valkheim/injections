@@ -14,12 +14,13 @@ add_subdirectory(third_party/googletest)
 
 list(APPEND targets
     ulib
+    apc_queue_code_injecter
     #shellcode_local_process
     #shellcode_remote_process
     #pe_sample
     #dll_sample_injectee
-    dll_reflective_injectee
-    dll_injecter
+    #dll_reflective_injectee
+    #dll_injecter
 )
 
 foreach(target IN ITEMS ${targets})

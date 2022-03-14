@@ -7,4 +7,5 @@
 #include "../processes.h"
 #include "../shellcodes.h"
 #include "../syscalls.h"
+#include "../threads.h"
 #include "../version.h"
