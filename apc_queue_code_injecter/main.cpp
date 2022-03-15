@@ -104,6 +104,7 @@ Error:
   return false;
 }
 
+// https://attack.mitre.org/techniques/T1055/004/
 int main(int argc, char **argv)
 {
   auto ok = false;

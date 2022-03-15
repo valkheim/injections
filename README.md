@@ -42,4 +42,8 @@ Running main() from .\third_party\googletest\src\gtest_main.cc
 [----------] Global test environment tear-down
 [==========] 7 tests from 4 test suites ran. (73 ms total)
 [  PASSED  ] 7 tests.
-```
+```#
+
+## Links
+
+* https://github.com/S4R1N/AlternativeShellcodeExec

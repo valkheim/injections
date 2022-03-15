@@ -1,6 +1,7 @@
 #include "dll_inject.h"
 #include "ulib.h"
 
+// https://attack.mitre.org/techniques/T1055/001/
 int main(int argc, char *argv[])
 {
   if (argc != 3) {
