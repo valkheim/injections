@@ -8,6 +8,8 @@ extern "C" __declspec(dllexport) bool example()
   return true;
 }
 
+extern "C" __declspec(dllexport) int ret(int value) { return value; }
+
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD nReason, LPVOID lpReserved)
 {
   TCHAR pszMessage[1024] = {0};
@@ -16,19 +18,19 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD nReason, LPVOID lpReserved)
 
   switch (nReason) {
     case DLL_PROCESS_ATTACH:
-      MessageBoxA(NULL, "DLL_PROCESS_ATTACH", "DLL_PROCESS_ATTACH", NULL);
+      // MessageBoxA(NULL, "DLL_PROCESS_ATTACH", "DLL_PROCESS_ATTACH", NULL);
       break;
 
     case DLL_THREAD_ATTACH:
-      MessageBoxA(NULL, "DLL_THREAD_ATTACH", "DLL_THREAD_ATTACH", NULL);
+      // MessageBoxA(NULL, "DLL_THREAD_ATTACH", "DLL_THREAD_ATTACH", NULL);
       break;
 
     case DLL_THREAD_DETACH:
-      MessageBoxA(NULL, "DLL_THREAD_DETACH", "DLL_THREAD_DETACH", NULL);
+      // MessageBoxA(NULL, "DLL_THREAD_DETACH", "DLL_THREAD_DETACH", NULL);
       break;
 
     case DLL_PROCESS_DETACH:
-      MessageBoxA(NULL, "DLL_PROCESS_DETACH", "DLL_PROCESS_DETACH", NULL);
+      // MessageBoxA(NULL, "DLL_PROCESS_DETACH", "DLL_PROCESS_DETACH", NULL);
       break;
   }
   return TRUE;

@@ -1,0 +1,5 @@
+set(target hook)
+file(GLOB_RECURSE sources "${CMAKE_CURRENT_SOURCE_DIR}/*.cpp")
+add_executable(${target} ${sources})
+target_include_directories(${target} PUBLIC "../ulib/include/public")
+target_link_libraries(${target} ulib)

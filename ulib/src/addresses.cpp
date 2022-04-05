@@ -4,6 +4,7 @@
 #include <windows.h>
 
 #include <cstdint>
+#include <format>
 
 #include "log.h"
 
@@ -35,7 +36,7 @@ namespace ul
 
     auto procedure = GetProcAddress(handle, procedure_name.data());
     if (procedure == nullptr) {
-      ::ul::error("Cannot GetProcAddress");
+      ::ul::error(std::format("Cannot GetProcAddress for {}", procedure_name));
     }
 
     return procedure;

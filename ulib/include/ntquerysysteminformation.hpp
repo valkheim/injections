@@ -3,9 +3,6 @@
 #include "nt.h"
 #include "addresses.h"
 
-typedef NTSTATUS(WINAPI* _NtQuerySystemInformation)(__in SYSTEM_INFORMATION_CLASS SystemInformationClass, __inout PVOID SystemInformation,
-                                                    __in ULONG SystemInformationLength, __out_opt PULONG ReturnLength);
-
 namespace ul
 {
 

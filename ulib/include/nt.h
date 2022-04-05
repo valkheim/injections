@@ -9,7 +9,7 @@ typedef LONG KPRIORITY;
 typedef struct _CLIENT_ID {
   DWORD UniqueProcess;
   DWORD UniqueThread;
-} CLIENT_ID;
+} CLIENT_ID, *PCLIENT_ID;
 
 typedef enum _THREAD_STATE {
   StateInitialized,
@@ -40,7 +40,7 @@ typedef struct _UNICODE_STRING {
   USHORT Length;
   USHORT MaximumLength;
   PWSTR Buffer;
-} UNICODE_STRING;
+} UNICODE_STRING, *PUNICODE_STRING;
 
 typedef struct _VM_COUNTERS {
 #ifdef _WIN64
@@ -229,3 +229,25 @@ typedef struct {
   WORD offset : 12;
   WORD type : 4;
 } IMAGE_RELOC, *PIMAGE_RELOC;
+
+typedef struct _OBJECT_ATTRIBUTES {
+  ULONG Length;
+  HANDLE RootDirectory;
+  PUNICODE_STRING ObjectName;
+  ULONG Attributes;
+  PVOID SecurityDescriptor;
+  PVOID SecurityQualityOfService;
+} OBJECT_ATTRIBUTES, *POBJECT_ATTRIBUTES;
+
+using _NtCreateSection = NTSTATUS(NTAPI*)(OUT PHANDLE SectionHandle, IN ULONG DesiredAccess, IN POBJECT_ATTRIBUTES ObjectAttributes OPTIONAL,
+                                          IN PLARGE_INTEGER MaximumSize OPTIONAL, IN ULONG PageAttributess, IN ULONG SectionAttributes,
+                                          IN HANDLE FileHandle OPTIONAL);
+using _NtMapViewOfSection = NTSTATUS(NTAPI*)(HANDLE SectionHandle, HANDLE ProcessHandle, PVOID* BaseAddress, ULONG_PTR ZeroBits, SIZE_T CommitSize,
+                                             PLARGE_INTEGER SectionOffset, PSIZE_T ViewSize, DWORD InheritDisposition, ULONG AllocationType,
+                                             ULONG Win32Protect);
+using _RtlCreateUserThread = NTSTATUS(NTAPI*)(IN HANDLE ProcessHandle, IN PSECURITY_DESCRIPTOR SecurityDescriptor OPTIONAL,
+                                              IN BOOLEAN CreateSuspended, IN ULONG StackZeroBits, IN OUT PULONG StackReserved,
+                                              IN OUT PULONG StackCommit, IN PVOID StartAddress, IN PVOID StartParameter OPTIONAL,
+                                              OUT PHANDLE ThreadHandle, OUT PCLIENT_ID ClientID);
+using _NtQuerySystemInformation = NTSTATUS(WINAPI*)(__in SYSTEM_INFORMATION_CLASS SystemInformationClass, __inout PVOID SystemInformation,
+                                                    __in ULONG SystemInformationLength, __out_opt PULONG ReturnLength);
