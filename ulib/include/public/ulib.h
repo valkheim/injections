@@ -10,3 +10,4 @@
 #include "../syscalls.h"
 #include "../threads.h"
 #include "../version.h"
+#include "../window.h"
