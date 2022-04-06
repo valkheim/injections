@@ -17,7 +17,7 @@ namespace ul
     DWORD old_protect;
     if (!hooked()) return false;
 
-    if (!VirtualProtect((LPVOID)hook_location, hook_size, PAGE_READWRITE, &old_protect)) {
+    if (!VirtualProtect((LPVOID)hook_location, hook_size, PAGE_EXECUTE_READWRITE, &old_protect)) {
       ::ul::error("Cannot protect 0/1");
       return false;
     }
@@ -44,7 +44,7 @@ namespace ul
       hook_content = std::vector<std::uint8_t>{0xe9, 0x00, 0x00, 0x00, 0x00};
       auto offset = (std::uint32_t)detour - (std::uint32_t)((std::uint32_t)hook_location + 5);
       std::memcpy(hook_content.data() + 1, &offset, sizeof(&offset));
-      if (!VirtualProtect((LPVOID)hook_location, hook_size, PAGE_READWRITE, &old_protect)) {
+      if (!VirtualProtect((LPVOID)hook_location, hook_size, PAGE_EXECUTE_READWRITE, &old_protect)) {
         ::ul::error("Cannot protect 0/1");
         return false;
       }
@@ -71,7 +71,7 @@ namespace ul
       std::memcpy(hook_backup.data(), hook_location, hook_size);
       hook_content = std::vector<std::uint8_t>{0xFF, 0x25, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00};
       std::memcpy(hook_content.data() + 6, &detour, sizeof(&detour));
-      if (!VirtualProtect((LPVOID)hook_location, hook_size, PAGE_READWRITE, &old_protect)) {
+      if (!VirtualProtect((LPVOID)hook_location, hook_size, PAGE_EXECUTE_READWRITE, &old_protect)) {
         ::ul::error("Cannot protect 0/1");
         return false;
       }
@@ -95,7 +95,7 @@ namespace ul
       std::memcpy(hook_backup.data(), hook_location, hook_size);
       hook_content = std::vector<std::uint8_t>{0x48, 0xb8, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xe0};
       std::memcpy(hook_content.data() + 2, &detour, sizeof(&detour));
-      if (!VirtualProtect((LPVOID)hook_location, hook_size, PAGE_READWRITE, &old_protect)) {
+      if (!VirtualProtect((LPVOID)hook_location, hook_size, PAGE_EXECUTE_READWRITE, &old_protect)) {
         ::ul::error("Cannot protect 0/1");
         return false;
       }
@@ -122,7 +122,7 @@ namespace ul
       for (unsigned i = 0; i < sizeof(&detour) / 2; ++i)
         hook_content[i + 9] = (std::uint8_t)((DWORD_PTR)detour >> (sizeof(std::uint32_t) * 8) + i * 8);
 
-      if (!VirtualProtect((LPVOID)hook_location, hook_size, PAGE_READWRITE, &old_protect)) {
+      if (!VirtualProtect((LPVOID)hook_location, hook_size, PAGE_EXECUTE_READWRITE, &old_protect)) {
         ::ul::error("Cannot protect 0/1");
         return false;
       }
